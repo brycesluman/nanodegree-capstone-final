@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/sign_in_sign_up"
+          android:id="@+id/sign_in_out"
+    />
+    <item android:title="@string/choose_language"
+        android:id="@+id/open_language_picker"
+        />
+</menu>
