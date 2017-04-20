@@ -1,10 +1,15 @@
 package org.sluman.imtranslate.data;
 
 import android.app.IntentService;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.google.cloud.translate.Language;
 import com.google.cloud.translate.Translate;
@@ -18,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import org.sluman.imtranslate.BuildConfig;
+import org.sluman.imtranslate.R;
 import org.sluman.imtranslate.models.ConversationMessage;
 import org.sluman.imtranslate.models.LanguageView;
 import org.sluman.imtranslate.models.Message;
@@ -52,10 +58,6 @@ public class FirebaseIntentService extends IntentService {
     public static final String ACTION_TRY_OPEN_CONVERSATION = "org.sluman.imtranslate.data.action.ACTION_TRY_OPEN_CONVERSATION";
     public static final String ACTION_DISPLAY_CONVERSATION = "org.sluman.imtranslate.data.action.ACTION_DISPLAY_CONVERSATION";
     public static final String ACTION_DISPLAY_USER_CONVERSATIONS = "org.sluman.imtranslate.data.action.ACTION_DISPLAY_USER_CONVERSATIONS";
-    public static final String ACTION_LISTEN_MESSAGES = "org.sluman.imtranslate.data.action.ACTION_LISTEN_MESSAGES";
-    public static final String ACTION_STOP_LISTEN_MESSAGES = "org.sluman.imtranslate.data.action.ACTION_STOP_LISTEN_MESSAGES";
-    public static final String ACTION_LISTEN_CONVERSATIONS = "org.sluman.imtranslate.data.action.ACTION_LISTEN_CONVERSATIONS";
-    public static final String ACTION_STOP_LISTEN_CONVERSATIONS = "org.sluman.imtranslate.data.action.ACTION_STOP_LISTEN_CONVERSATIONS";
     public static final String ACTION_UPDATE_CONVERSATION = "org.sluman.imtranslate.data.action.ACTION_UPDATE_CONVERSATION";
     public static final String ACTION_GET_USER = "org.sluman.imtranslate.data.action.ACTION_GET_USER";
     public static final String ACTION_RETURN_USER = "org.sluman.imtranslate.data.action.ACTION_RETURN_USER";
@@ -63,6 +65,7 @@ public class FirebaseIntentService extends IntentService {
     public static final String ACTION_DISPLAY_LANGUAGE_VIEW = "org.sluman.imtranslate.data.action.ACTION_DISPLAY_LANGUAGE_VIEW";
     public static final String ACTION_DISPLAY_LANGUAGES = "org.sluman.imtranslate.data.action.ACTION_DISPLAY_LANGUAGES";
     public static final String ACTION_NO_RESULTS = "org.sluman.imtranslate.data.action.ACTION_NO_RESULTS";
+    public static final String ACTION_DATA_FETCHED = "org.sluman.imtranslate.data.action.ACTION_DATA_FETCHED";
 
     // TODO: Rename parameters
     public static final String EXTRA_USER = "org.sluman.imtranslate.data.extra.USER";
@@ -72,11 +75,8 @@ public class FirebaseIntentService extends IntentService {
     public static final String EXTRA_PHOTO_URL = "org.sluman.imtranslate.data.extra.PHOTO_URL";
     public static final String EXTRA_DISPLAY_NAME = "org.sluman.imtranslate.data.extra.EXTRA_DISPLAY_NAME";
     public static final String EXTRA_USERNAME = "org.sluman.imtranslate.data.extra.EXTRA_USERNAME";
-    public static final String EXTRA_TIMESTAMP = "org.sluman.imtranslate.data.extra.EXTRA_TIMESTAMP";
-    public static final String EXTRA_ONLINE = "org.sluman.imtranslate.data.extra.EXTRA_ONLINE";
     public static final String EXTRA_SEARCH_STRING = "org.sluman.imtranslate.data.extra.EXTRA_SEARCH_STRING";
     public static final String EXTRA_CONVERSATION_ID = "org.sluman.imtranslate.data.extra.EXTRA_CONVERSATION_ID";
-    public static final String EXTRA_TRANSLATION_STRING = "org.sluman.imtranslate.data.extra.EXTRA_TRANSLATION_STRING";
     public static final String EXTRA_SOURCE_LANG = "org.sluman.imtranslate.data.extra.EXTRA_SOURCE_LANG";
     public static final String EXTRA_TARGET_LANG = "org.sluman.imtranslate.data.extra.EXTRA_TARGET_LANG";
     public static final String EXTRA_LANGUAGE = "org.sluman.imtranslate.data.extra.EXTRA_LANGUAGE";
@@ -88,6 +88,8 @@ public class FirebaseIntentService extends IntentService {
     FirebaseDatabase database = Utils.getDatabase();
     DatabaseReference myRef = database.getReference();
     private static String TAG = FirebaseIntentService.class.getName();
+
+    private int mSearchCount = 0;
 
 
     public FirebaseIntentService() {
@@ -231,11 +233,8 @@ public class FirebaseIntentService extends IntentService {
     public void addConversation(String uid) {
         String key = Utils.buildKey(SharedPrefsUtils.getUser(getApplicationContext()), uid);
         Map<String, Object> childUpdates = new HashMap<>();
-        Message message = new Message();
         for (String userKey : Utils.getKeys(key)) {
             childUpdates.put("/conversations/" + key + "/" + userKey, true);
-            ConversationMessage conversationMessage = new ConversationMessage();
-            childUpdates.put("/user-conversations/" + userKey + "/" + key, conversationMessage.toMap());
         }
 
         myRef.updateChildren(childUpdates);
@@ -244,23 +243,8 @@ public class FirebaseIntentService extends IntentService {
 
 
     public void openConversation(String conversationId) {
-        getUser(conversationId, Utils.getOtherUserKey(conversationId, getApplicationContext()));
-    }
+        broadcastDisplayConversation(conversationId);
 
-    public void getUser(final String conversationId, final String uid) {
-        myRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    User user = snapshot.getValue(User.class);
-                    broadcastDisplayConversation(conversationId, user);
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     public void getUserByConversationId(final String conversationId) {
@@ -300,14 +284,15 @@ public class FirebaseIntentService extends IntentService {
             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
                 User user = dataSnapshot.getValue(User.class);
                 if (user.searchUser(searchString)) {
-                   broadcastDisplayUser(user);
+                    mSearchCount++;
+                    broadcastDisplayUser(user);
                 } else {
-                   broadcastNoResults();
+                    broadcastNoResults();
                 }
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                broadcastNoResults();
             }
 
             @Override
@@ -393,9 +378,12 @@ public class FirebaseIntentService extends IntentService {
         bm.sendBroadcast(intent);
     }
     public void broadcastNoResults() {
-        Intent intent = new Intent(ACTION_NO_RESULTS);
-        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
-        bm.sendBroadcast(intent);
+        if (mSearchCount == 0) {
+            mSearchCount = 0;
+            Intent intent = new Intent(ACTION_NO_RESULTS);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
+            bm.sendBroadcast(intent);
+        }
     }
 
     public void broadcastLanguage(LanguageView languageView) {
@@ -408,15 +396,14 @@ public class FirebaseIntentService extends IntentService {
     }
 
     // called to send data to Activity
-    public void broadcastDisplayConversation(String param, User user) {
+    public void broadcastDisplayConversation(String param) {
         Log.d(TAG, "open conversation: " + param);
         Intent intent = new Intent(ACTION_DISPLAY_CONVERSATION);
         intent.putExtra(EXTRA_CONVERSATION_ID, param);
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(EXTRA_USER, user);
-        intent.putExtras(bundle);
 
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
         bm.sendBroadcast(intent);
     }
+
+
 }

@@ -12,15 +12,16 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:padding="10dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_centerVertical="true"
         android:background="@drawable/circle_background"
         app:srcCompat="@drawable/ic_search_white"
+        android:contentDescription="@string/no_results"
         />
 
     <TextView
         android:id="@+id/empty_text"
-        android:layout_toRightOf="@+id/empty_image"
+        android:layout_toEndOf="@+id/empty_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"

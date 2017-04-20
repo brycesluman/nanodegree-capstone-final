@@ -8,7 +8,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:paddingLeft="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:gravity="center_vertical"
         android:text="@string/choose_your_language"
         style="@style/Base.TextAppearance.AppCompat.Subhead"

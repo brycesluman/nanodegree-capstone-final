@@ -1,6 +1,7 @@
 package org.sluman.imtranslate;
 
 import android.app.Activity;
+import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,18 +28,29 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import org.sluman.imtranslate.data.FirebaseIntentService;
+import org.sluman.imtranslate.data.FirebaseWidgetService;
 import org.sluman.imtranslate.dummy.DummyContent;
 import org.sluman.imtranslate.models.Message;
+import org.sluman.imtranslate.models.MessageView;
 import org.sluman.imtranslate.utils.SharedPrefsUtils;
+import org.sluman.imtranslate.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.sluman.imtranslate.data.FirebaseIntentService.ACTION_DISPLAY_MESSAGE;
+import static org.sluman.imtranslate.data.FirebaseIntentService.EXTRA_CONVERSATION_ID;
+import static org.sluman.imtranslate.data.FirebaseIntentService.EXTRA_MESSAGE;
 
 /**
  * A fragment representing a single ConversationMessage detail screen.
@@ -54,14 +66,19 @@ public class ConversationDetailFragment extends Fragment {
     public static final String ARG_CONVERSATION_ID = "conversation_id";
     public static final String ARG_USER = "user";
 
+    FirebaseDatabase database = Utils.getDatabase();
+    DatabaseReference myRef = database.getReference();
+    Query mMessageQuery;
+    ChildEventListener mMessageChildEventListener;
     /**
      * The dummy content this fragment is presenting.
      */
-    private DummyContent.DummyItem mItem;
 
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
     private RVAdapter mAdapter;
+
+    private String mConversationId;
     private static String TAG = ConversationDetailFragment.class.getName();
     // ...
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -74,8 +91,6 @@ public class ConversationDetailFragment extends Fragment {
                 mAdapter.addMessage(message);
                 Log.d(TAG, " " + message.text);
             }
-//                final String param = intent.getStringExtra(FirebaseIntentService.ACTION_DISPLAY_MESSAGE);
-//                Toast.makeText(getApplicationContext(), param, Toast.LENGTH_LONG).show();
         }
         }
     };
@@ -92,19 +107,10 @@ public class ConversationDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments().containsKey(ARG_CONVERSATION_ID)) {
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
-//            mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            mConversationId = getArguments().getString(ConversationDetailFragment.ARG_CONVERSATION_ID);
             mAdapter = new RVAdapter(new ArrayList<Message>());
 
-
-
             Activity activity = this.getActivity();
-//            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-//            if (appBarLayout != null) {
-//                appBarLayout.setTitle(mItem.content);
-//            }
         }
     }
 
@@ -114,7 +120,6 @@ public class ConversationDetailFragment extends Fragment {
         mAdapter.clearMessages();
         IntentFilter filter = new IntentFilter();
         filter.addAction(FirebaseIntentService.ACTION_DISPLAY_MESSAGE);
-//            filter.addDataPath(getArguments().getString(ARG_CONVERSATION_ID), PatternMatcher.PATTERN_LITERAL);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getActivity());
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -130,17 +135,12 @@ public class ConversationDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.conversation_detail, container, false);
-
-        // Show the dummy content as text in a TextView.
-//        if (mItem != null) {
-//            ((TextView) rootView.findViewById(R.id.conversation_detail)).setText(mItem.details);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setHasFixedSize(true);
         mLinearLayoutManager.setStackFromEnd(true);
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
-//        }
 
         return rootView;
     }
@@ -209,6 +209,7 @@ public class ConversationDetailFragment extends Fragment {
             holder.userName.setText(messages.get(position).username);
             holder.text.setText(messages.get(position).text);
             holder.translatedText.setText(messages.get(position).translatedText);
+            holder.userAvatar.setContentDescription(messages.get(position).username);
             Glide.with(getActivity())
                     .load(messages.get(position).userAvatar)
                     .asBitmap().centerCrop().into(new BitmapImageViewTarget(holder.userAvatar) {
@@ -255,5 +256,89 @@ public class ConversationDetailFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mMessageChildEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
+
+                // A new comment has been added, add it to the displayed list
+                Message message = dataSnapshot.getValue(Message.class);
+                MessageView messageView = new MessageView(dataSnapshot.getKey(), message);
+                Log.d(TAG, "text: " + message.text + " name: " + message.username);
+                broadcastDisplayMessage(messageView);
+                // ...
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
+
+                // A comment has changed, use the key to determine if we are displaying this
+                // comment and if so displayed the changed comment.
+                Message newComment = dataSnapshot.getValue(Message.class);
+                String commentKey = dataSnapshot.getKey();
+
+                // ...
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+
+                // A comment has changed, use the key to determine if we are displaying this
+                // comment and if so remove it.
+                String commentKey = dataSnapshot.getKey();
+
+                // ...
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
+
+                // A comment has changed position, use the key to determine if we are
+                // displaying this comment and if so move it.
+                Message movedComment = dataSnapshot.getValue(Message.class);
+                String commentKey = dataSnapshot.getKey();
+
+                // ...
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "postComments:onCancelled", databaseError.toException());
+
+            }
+        };
+        mMessageQuery = myRef.child("messages").child(mConversationId).limitToLast(20);
+        mMessageQuery.addChildEventListener(mMessageChildEventListener);
+    }
+
+    // called to send data to Activity
+    public void broadcastDisplayMessage(MessageView param) {
+        Utils.refreshWidget(getContext());
+
+        Intent intent = new Intent(ACTION_DISPLAY_MESSAGE);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(EXTRA_MESSAGE, param);
+
+        intent.putExtras(bundle);
+        intent.putExtra(EXTRA_CONVERSATION_ID, param);
+
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getActivity());
+        bm.sendBroadcast(intent);
+    }
+
+    @Override
+    public void onStop() {
+        if (mMessageChildEventListener != null) {
+            mMessageQuery.removeEventListener(mMessageChildEventListener);
+        }
+        super.onStop();
     }
 }

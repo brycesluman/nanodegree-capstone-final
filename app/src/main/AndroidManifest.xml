@@ -19,11 +19,11 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />
+
         <activity
             android:name=".ConversationListActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,7 +36,6 @@
             android:configChanges="orientation"
             android:label="@string/title_conversation_detail"
             android:parentActivityName=".ConversationListActivity"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -46,8 +45,7 @@
             android:name=".SettingsActivity"
             android:configChanges="orientation|keyboard"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".ConversationListActivity"
-            android:screenOrientation="portrait">
+            android:parentActivityName=".ConversationListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.sluman.imtranslate.ConversationListActivity" />
@@ -58,25 +56,23 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".GoogleSignInActivity"
+        <activity
+            android:name=".GoogleSignInActivity"
             android:parentActivityName=".ConversationListActivity"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.sluman.imtranslate.ConversationListActivity" />
         </activity>
-
-        <activity android:name=".SearchActivity"
+        <activity
+            android:name=".SearchActivity"
             android:parentActivityName=".ConversationListActivity"
-            android:windowSoftInputMode="stateVisible"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateVisible">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.sluman.imtranslate.ConversationListActivity" />
         </activity>
-
         <activity
             android:name=".LanguagesActivity"
             android:label="@string/title_activity_languages"
@@ -86,12 +82,32 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.sluman.imtranslate.ConversationListActivity" />
         </activity>
-        <service
-            android:name=".data.MyFirebaseMessagingService">
+
+        <service android:name=".data.MyFirebaseMessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        <service
+            android:name=".data.WidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <receiver android:name=".data.NewAppWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+
+                <action android:name="org.sluman.imtranslate.data.action.ACTION_DATA_FETCHED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/new_app_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".data.FirebaseWidgetService"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>

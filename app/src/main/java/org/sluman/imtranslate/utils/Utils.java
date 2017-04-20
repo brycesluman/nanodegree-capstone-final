@@ -1,8 +1,13 @@
 package org.sluman.imtranslate.utils;
 
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.content.Intent;
 
 import com.google.firebase.database.FirebaseDatabase;
+
+import org.sluman.imtranslate.R;
+import org.sluman.imtranslate.data.FirebaseWidgetService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,5 +58,13 @@ public class Utils {
             }
         }
         return key;
+    }
+
+    public static void refreshWidget(Context context) {
+        Intent widgetIntent = new Intent(context, FirebaseWidgetService.class);
+        widgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        int[] ids = {R.xml.new_app_widget_info};
+        widgetIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        context.sendBroadcast(widgetIntent);
     }
 }

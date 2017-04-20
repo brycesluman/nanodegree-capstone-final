@@ -1,12 +1,18 @@
 package org.sluman.imtranslate;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -37,6 +43,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import org.sluman.imtranslate.data.FirebaseIntentService;
+import org.sluman.imtranslate.data.FirebaseWidgetService;
 import org.sluman.imtranslate.models.ConversationMessage;
 import org.sluman.imtranslate.models.ConversationMessageView;
 import org.sluman.imtranslate.models.Message;
@@ -79,17 +86,25 @@ public class ConversationListActivity extends BaseActivity {
                     Log.d(TAG, " " + message.text);
                 }
             } else if (intent.getAction().equals(FirebaseIntentService.ACTION_DISPLAY_CONVERSATION)) {
-                Log.d(TAG, "display conversation: " + intent.getStringExtra(FirebaseIntentService.EXTRA_CONVERSATION_ID));
-                final Bundle bundle = intent.getExtras();
-                User user = bundle.getParcelable(FirebaseIntentService.EXTRA_USER);
-                Intent conversationIntent = new Intent(context, ConversationDetailActivity.class);
-                Bundle conversationBundle = new Bundle();
-                conversationBundle.putParcelable(ConversationDetailFragment.ARG_USER, user);
-                conversationIntent.putExtra(ConversationDetailFragment.ARG_CONVERSATION_ID,
-                        intent.getStringExtra(FirebaseIntentService.EXTRA_CONVERSATION_ID));
-                conversationIntent.putExtras(conversationBundle);
-                conversationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(conversationIntent);
+                if (mTwoPane) {
+                    Bundle arguments = new Bundle();
+                    arguments.putString(ConversationDetailFragment.ARG_CONVERSATION_ID,
+                            intent.getStringExtra(FirebaseIntentService.EXTRA_CONVERSATION_ID));
+
+                    ConversationDetailFragment fragment = new ConversationDetailFragment();
+                    fragment.setArguments(arguments);
+
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.conversation_detail_container, fragment, DETAILFRAGMENT_TAG)
+                            .commit();
+                } else {
+                    Log.d(TAG, "display conversation: " + intent.getStringExtra(FirebaseIntentService.EXTRA_CONVERSATION_ID));
+                    Intent conversationIntent = new Intent(context, ConversationDetailActivity.class);
+                    conversationIntent.putExtra(ConversationDetailFragment.ARG_CONVERSATION_ID,
+                            intent.getStringExtra(FirebaseIntentService.EXTRA_CONVERSATION_ID));
+                    conversationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(conversationIntent);
+                }
             }
         }
     };
@@ -97,6 +112,7 @@ public class ConversationListActivity extends BaseActivity {
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
     FirebaseDatabase database = Utils.getDatabase();
     DatabaseReference myRef = database.getReference();
     ChildEventListener mConversationChildEventListener;
@@ -129,7 +145,7 @@ public class ConversationListActivity extends BaseActivity {
 
         mRecyclerView = (RecyclerView) findViewById(R.id.conversation_list);
         assert mRecyclerView != null;
-        setupRecyclerView((RecyclerView) mRecyclerView);
+        setupRecyclerView(mRecyclerView);
 
         if (findViewById(R.id.conversation_detail_container) != null) {
             // The detail container view will be present only in the
@@ -166,7 +182,7 @@ public class ConversationListActivity extends BaseActivity {
     @Override
     public void onStop() {
         if (mConversationChildEventListener != null) {
-            myRef.child("user-conversations").child(SharedPrefsUtils.getUser(getApplicationContext())).removeEventListener(mConversationChildEventListener);
+            myRef.child("user-conversations").child(SharedPrefsUtils.getUser(getApplicationContext())).orderByChild("timestamp").removeEventListener(mConversationChildEventListener);
         }
         super.onStop();
     }
@@ -229,11 +245,13 @@ public class ConversationListActivity extends BaseActivity {
 
             }
         };
-        myRef.child("user-conversations").child(SharedPrefsUtils.getUser(getApplicationContext())).addChildEventListener(mConversationChildEventListener);
+        myRef.child("user-conversations").child(SharedPrefsUtils.getUser(getApplicationContext())).orderByChild("timestamp").addChildEventListener(mConversationChildEventListener);
 
     }
 
     public void broadcastUpdateUserConversations(ConversationMessageView param) {
+        Utils.refreshWidget(getApplicationContext());
+
         Log.d(TAG, "update conversation: " + param);
         Intent intent = new Intent(ACTION_UPDATE_CONVERSATION);
         Bundle bundle = new Bundle();
@@ -244,7 +262,9 @@ public class ConversationListActivity extends BaseActivity {
         bm.sendBroadcast(intent);
     }
 
-    public void broadcastDisplayUserConversations(ConversationMessage param) {
+    public void broadcastDisplayUserConversations(ConversationMessageView param) {
+        Utils.refreshWidget(getApplicationContext());
+
         Log.d(TAG, "broadcast user conversations: " + param.username);
         Intent intent = new Intent(ACTION_DISPLAY_USER_CONVERSATIONS);
         Bundle bundle = new Bundle();
@@ -354,6 +374,7 @@ public class ConversationListActivity extends BaseActivity {
                 vh.userName.setText(messages.get(position).otherUsername);
                 vh.text.setText(messages.get(position).text);
                 vh.translatedText.setText(messages.get(position).translatedText);
+                vh.userAvatar.setContentDescription(messages.get(position).otherUsername);
                 Glide.with(ConversationListActivity.this)
                         .load(messages.get(position).otherAvatar)
                         .asBitmap().centerCrop().into(new BitmapImageViewTarget(vh.userAvatar) {

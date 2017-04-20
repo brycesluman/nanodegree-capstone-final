@@ -16,6 +16,7 @@ package org.sluman.imtranslate;
  * limitations under the License.
  */
 
+import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -63,6 +64,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import org.sluman.imtranslate.data.FirebaseIntentService;
+import org.sluman.imtranslate.data.FirebaseWidgetService;
 import org.sluman.imtranslate.models.User;
 import org.sluman.imtranslate.utils.SharedPrefsUtils;
 
@@ -300,6 +302,10 @@ public class GoogleSignInActivity extends BaseActivity implements
             findViewById(R.id.title_text).setVisibility(View.GONE);
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+
+            Intent serviceIntent = new Intent(this, FirebaseWidgetService.class);
+//
+            startService(serviceIntent);
         } else {
             if (mActionBar != null) {
                 mActionBar.setDisplayHomeAsUpEnabled(false);

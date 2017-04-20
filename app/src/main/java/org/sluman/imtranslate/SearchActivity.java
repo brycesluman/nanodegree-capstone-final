@@ -56,8 +56,9 @@ public class SearchActivity extends BaseActivity {
                     mAdapter.addUser(user);
                     Log.d(TAG, " " + user.username);
                     mRecyclerView.setVisibility(View.VISIBLE);
-                    hideNoResults();
+
                 }
+                hideNoResults();
             } else if (intent.getAction().equals(FirebaseIntentService.ACTION_DISPLAY_CONVERSATION)) {
                 final Bundle bundle = intent.getExtras();
                 User user = bundle.getParcelable(FirebaseIntentService.EXTRA_USER);
@@ -70,9 +71,7 @@ public class SearchActivity extends BaseActivity {
                 conversationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(conversationIntent);
             } else if (intent.getAction().equals(FirebaseIntentService.ACTION_NO_RESULTS)) {
-                if (mAdapter != null) {
-                    showNoResults();
-                }
+                showNoResults();
             }
         }
     };

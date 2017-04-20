@@ -113,4 +113,6 @@
     <string name="please_sign_in_to_use_imtranslate">Please sign in to use IMTranslate</string>
     <string name="search_for_users_to_chat_to">Search for users with which to chat</string>
     <string name="no_results">No results</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>

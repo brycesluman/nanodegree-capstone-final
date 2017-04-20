@@ -1,6 +1,9 @@
 package org.sluman.imtranslate;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -41,15 +44,25 @@ import static org.sluman.imtranslate.data.FirebaseIntentService.EXTRA_MESSAGE;
  * in a {@link ConversationListActivity}.
  */
 public class ConversationDetailActivity extends BaseActivity {
-    FirebaseDatabase database = Utils.getDatabase();
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(FirebaseIntentService.ACTION_RETURN_USER)) {
+                final Bundle bundle = intent.getExtras();
+                mOtherUser = bundle.getParcelable(FirebaseIntentService.EXTRA_USER);
+                finishOnCreate();
+            }
+        }
+    };
+    ActionBar mActionBar;
+
     private FirebaseAnalytics mFirebaseAnalytics;
-    DatabaseReference myRef = database.getReference();
+
     private FirebaseUser mUser;
-//    private User mOtherUser;
+    private User mOtherUser;
     private String mConversationId;
-    private String mTargetLang;
-    Query mMessageQuery;
-    ChildEventListener mMessageChildEventListener;
+    boolean mFirstLoad;
     private static String TAG = ConversationDetailActivity.class.getName();
 
     @Override
@@ -57,20 +70,24 @@ public class ConversationDetailActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation_detail);
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-//        mDatabase = FirebaseDatabase.getInstance().getReference();
+
         mConversationId = getIntent().getStringExtra(ConversationDetailFragment.ARG_CONVERSATION_ID);
-        final Bundle bundle = getIntent().getExtras();
-        final User mOtherUser = bundle.getParcelable(ConversationDetailFragment.ARG_USER);
+
+        Intent intent = new Intent(this, FirebaseIntentService.class);
+        intent.setAction(FirebaseIntentService.ACTION_GET_USER);
+        intent.putExtra(FirebaseIntentService.EXTRA_CONVERSATION_ID, mConversationId);
+
+        startService(intent);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
 
         // Show the Up button in the action bar.
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(mOtherUser.getDisplayName());
+        mActionBar = getSupportActionBar();
+        if (mActionBar != null) {
+            mActionBar.setDisplayHomeAsUpEnabled(true);
+
         }
 
         // savedInstanceState is non-null when there is fragment state
@@ -83,6 +100,27 @@ public class ConversationDetailActivity extends BaseActivity {
         // http://developer.android.com/guide/components/fragments.html
         //
         if (savedInstanceState == null) {
+            mFirstLoad = true;
+
+            Bundle arguments = new Bundle();
+            arguments.putString(ConversationDetailFragment.ARG_CONVERSATION_ID,
+                    getIntent().getStringExtra(ConversationDetailFragment.ARG_CONVERSATION_ID));
+            ConversationDetailFragment fragment = new ConversationDetailFragment();
+            fragment.setArguments(arguments);
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.conversation_detail_container, fragment)
+                    .commit();
+        } else {
+            mFirstLoad = false;
+        }
+
+    }
+
+    private void finishOnCreate() {
+        if (mActionBar != null) {
+            mActionBar.setTitle(mOtherUser.getDisplayName());
+        }
+        if (mFirstLoad) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -111,121 +149,34 @@ public class ConversationDetailActivity extends BaseActivity {
                 }
             });
 
-            Bundle arguments = new Bundle();
-            arguments.putString(ConversationDetailFragment.ARG_CONVERSATION_ID,
-                    getIntent().getStringExtra(ConversationDetailFragment.ARG_CONVERSATION_ID));
-            ConversationDetailFragment fragment = new ConversationDetailFragment();
-            fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.conversation_detail_container, fragment)
-                    .commit();
+
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mMessageChildEventListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
-
-                // A new comment has been added, add it to the displayed list
-                Message message = dataSnapshot.getValue(Message.class);
-                MessageView messageView = new MessageView(dataSnapshot.getKey(), message);
-                Log.d(TAG, "text: " + message.text + " name: " + message.username);
-                broadcastDisplayMessage(messageView);
-                // ...
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
-
-                // A comment has changed, use the key to determine if we are displaying this
-                // comment and if so displayed the changed comment.
-                Message newComment = dataSnapshot.getValue(Message.class);
-                String commentKey = dataSnapshot.getKey();
-
-                // ...
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
-
-                // A comment has changed, use the key to determine if we are displaying this
-                // comment and if so remove it.
-                String commentKey = dataSnapshot.getKey();
-
-                // ...
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
-
-                // A comment has changed position, use the key to determine if we are
-                // displaying this comment and if so move it.
-                Message movedComment = dataSnapshot.getValue(Message.class);
-                String commentKey = dataSnapshot.getKey();
-
-                // ...
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "postComments:onCancelled", databaseError.toException());
-
-            }
-        };
-        mMessageQuery = myRef.child("messages").child(mConversationId).limitToLast(20);
-        mMessageQuery.addChildEventListener(mMessageChildEventListener);
-    }
 
     @Override
     protected void onResume() {
+        super.onResume();
         mUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (mUser != null) {
-            // Name, email address, and profile photo Url
-            String name = mUser.getDisplayName();
-            String email = mUser.getEmail();
-            Uri photoUrl = mUser.getPhotoUrl();
-
-            // Check if user's email is verified
-            boolean emailVerified = mUser.isEmailVerified();
-
-            // The user's ID, unique to the Firebase project. Do NOT use this value to
-            // authenticate with your backend server, if you have one. Use
-            // FirebaseUser.getToken() instead.
-            String uid = mUser.getUid();
+        if (mUser == null) {
+            startActivity(new Intent(this, GoogleSignInActivity.class));
+            return;
         }
 
-        super.onResume();
-    }
-    // called to send data to Activity
-    public void broadcastDisplayMessage(MessageView param) {
-        Intent intent = new Intent(ACTION_DISPLAY_MESSAGE);
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(EXTRA_MESSAGE, param);
-
-        intent.putExtras(bundle);
-        intent.putExtra(EXTRA_CONVERSATION_ID, param);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(FirebaseIntentService.ACTION_RETURN_USER);
 
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
-        bm.sendBroadcast(intent);
-    }
-    @Override
-    protected void onPause() {
-        super.onPause();
+        bm.registerReceiver(mBroadcastReceiver, filter);
     }
 
+
+
     @Override
-    public void onStop() {
-        if (mMessageChildEventListener != null) {
-            mMessageQuery.removeEventListener(mMessageChildEventListener);
-        }
-        super.onStop();
+    protected void onPause() {
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
+        bm.unregisterReceiver(mBroadcastReceiver);
+        super.onPause();
     }
 
     @Override

@@ -84,14 +84,6 @@
             android:visibility="gone" />
 
 
-        <View
-            android:id="@+id/results_scrim"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorPrimary"
-            android:visibility="gone" />
-
-
     </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>
