@@ -34,7 +34,6 @@ public class LanguagesActivity extends BaseActivity {
             LanguageView languageView = bundle.getParcelable(FirebaseIntentService.EXTRA_LANGUAGE_VIEW);
             if (mAdapter != null) {
                 mAdapter.addLanguage(languageView);
-                Log.d("LanguagesActivity", languageView.getName() + "selected: " + languageView.isSelected());
             }
         }
         }

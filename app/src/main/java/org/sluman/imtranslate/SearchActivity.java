@@ -105,18 +105,10 @@ public class SearchActivity extends BaseActivity {
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         setupSearchView();
-//        if (findViewById(R.id.conversation_detail_container) != null) {
-//            // The detail container view will be present only in the
-//            // large-screen layouts (res/values-w900dp).
-//            // If this view is present, then the
-//            // activity should be in two-pane mode.
-//            mTwoPane = true;
-//        }
+
     }
 
     private void setupSearchView() {
-//        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-//        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         // hint, inputType & ime options seem to be ignored from XML! Set in code
         mSearchView.setQueryHint(getString(R.string.search));
         mSearchView.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
@@ -141,9 +133,7 @@ public class SearchActivity extends BaseActivity {
         mSearchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-//                if (hasFocus && confirmSaveContainer.getVisibility() == View.VISIBLE) {
-//                    hideSaveConfimation();
-//                }
+            //no-op
             }
         });
     }

@@ -158,7 +158,6 @@ public class ConversationDetailFragment extends Fragment {
             notifyItemInserted(getItemCount() - 1);
             notifyItemRangeChanged(1, this.messages.size());
             if (mRecyclerView != null) {
-                Log.d(TAG, "messages size: " + (getItemCount() - 1));
                 mRecyclerView.getLayoutManager().scrollToPosition(getItemCount() - 1);
                 mRecyclerView.scrollToPosition(getItemCount() - 1);
             }
@@ -269,7 +268,6 @@ public class ConversationDetailFragment extends Fragment {
                 // A new comment has been added, add it to the displayed list
                 Message message = dataSnapshot.getValue(Message.class);
                 MessageView messageView = new MessageView(dataSnapshot.getKey(), message);
-                Log.d(TAG, "text: " + message.text + " name: " + message.username);
                 broadcastDisplayMessage(messageView);
                 // ...
             }

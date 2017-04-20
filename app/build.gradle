@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias RELEASE_KEY_ALIAS
+            keyPassword RELEASE_KEY_PASSWORD
+            storeFile file("$rootDir/imtranslatekey.jks")
+            storePassword RELEASE_STORE_PASSWORD
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
@@ -21,8 +29,8 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
-
         packagingOptions {
             exclude 'META-INF/LICENSE'
             exclude 'META-INF/io.netty.versions.properties'
@@ -31,12 +39,11 @@ android {
     }
 }
 repositories {
-//    mavenCentral()
     jcenter() //works as well because it pulls from Maven Central
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -51,8 +58,6 @@ dependencies {
     compile 'com.google.firebase:firebase-auth:10.2.1'
     compile 'com.google.firebase:firebase-messaging:10.2.1'
     compile 'com.google.android.gms:play-services-auth:10.2.1'
-
-
     testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'

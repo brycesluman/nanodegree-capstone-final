@@ -198,7 +198,6 @@ public class ConversationListActivity extends BaseActivity {
                 // A new comment has been added, add it to the displayed list
                 ConversationMessage message = dataSnapshot.getValue(ConversationMessage.class);
                 ConversationMessageView messageView = new ConversationMessageView(dataSnapshot.getKey(), message);
-                Log.d(TAG, "text: " + message.text + " name: " + message.username);
                 broadcastDisplayUserConversations(messageView);
                 // ...
             }
@@ -208,7 +207,6 @@ public class ConversationListActivity extends BaseActivity {
                 Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
                 ConversationMessage message = dataSnapshot.getValue(ConversationMessage.class);
                 ConversationMessageView messageView = new ConversationMessageView(dataSnapshot.getKey(), message);
-                Log.d(TAG, "text: " + message.text + " name: " + message.username);
                 broadcastUpdateUserConversations(messageView);
                 // A comment has changed, use the key to determine if we are displaying this
                 // comment and if so displayed the changed comment.
