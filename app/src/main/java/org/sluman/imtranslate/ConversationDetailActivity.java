@@ -16,6 +16,8 @@ import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -60,6 +62,8 @@ public class ConversationDetailActivity extends BaseActivity {
     private FirebaseAnalytics mFirebaseAnalytics;
 
     private FirebaseUser mUser;
+
+    private AdView mAdView;
     private User mOtherUser;
     private String mConversationId;
     boolean mFirstLoad;
@@ -69,6 +73,15 @@ public class ConversationDetailActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation_detail);
+
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest.Builder builder = new AdRequest.Builder();
+//        if (BuildConfig.DEBUG) {
+        builder.addTestDevice("5D0A8F1C9E3730350A3DF50974E00A36");
+//        }
+        AdRequest adRequest = builder.build();
+        mAdView.loadAd(adRequest);
+
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         mConversationId = getIntent().getStringExtra(ConversationDetailFragment.ARG_CONVERSATION_ID);

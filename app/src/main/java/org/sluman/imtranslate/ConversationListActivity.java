@@ -33,6 +33,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -121,6 +123,7 @@ public class ConversationListActivity extends BaseActivity {
     private SimpleItemRecyclerViewAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private static String TAG = ConversationListActivity.class.getName();
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,6 +136,14 @@ public class ConversationListActivity extends BaseActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
+
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest.Builder builder = new AdRequest.Builder();
+//        if (BuildConfig.DEBUG) {
+            builder.addTestDevice("5D0A8F1C9E3730350A3DF50974E00A36");
+//        }
+        AdRequest adRequest = builder.build();
+        mAdView.loadAd(adRequest);
 
         mAdapter = new SimpleItemRecyclerViewAdapter(new ArrayList<ConversationMessageView>());
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);

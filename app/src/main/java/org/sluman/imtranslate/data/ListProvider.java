@@ -24,6 +24,7 @@ import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.target.AppWidgetTarget;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 
+import org.sluman.imtranslate.ConversationDetailFragment;
 import org.sluman.imtranslate.ConversationListActivity;
 import org.sluman.imtranslate.R;
 import org.sluman.imtranslate.models.ConversationMessageView;
@@ -82,10 +83,16 @@ public class ListProvider implements RemoteViewsFactory {
         final RemoteViews remoteView = new RemoteViews(
                 context.getPackageName(), R.layout.conversation_list_content);
         Log.d("ListProvider", "getViewAt: " + position);
+
         ConversationMessageView listItem = listItemList.get(position);
         remoteView.setTextViewText(R.id.text, listItem.text);
         remoteView.setTextViewText(R.id.username, listItem.otherUsername);
         loadImageForListItem(context, listItem.otherAvatar, remoteView);
+
+        Intent fillInIntent = new Intent();
+        fillInIntent.putExtra(ConversationDetailFragment.ARG_CONVERSATION_ID, listItem.getKey());
+        remoteView.setOnClickFillInIntent(R.id.item_layout
+                , fillInIntent);
 
         return remoteView;
     }

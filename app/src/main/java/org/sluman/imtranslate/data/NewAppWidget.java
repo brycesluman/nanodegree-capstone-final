@@ -4,6 +4,7 @@ package org.sluman.imtranslate.data;
  * Created by bryce on 4/14/17.
  */
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
@@ -12,6 +13,7 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import org.sluman.imtranslate.ConversationDetailActivity;
 import org.sluman.imtranslate.R;
 
 import static org.sluman.imtranslate.data.FirebaseIntentService.ACTION_DATA_FETCHED;
@@ -43,6 +45,12 @@ public class NewAppWidget extends AppWidgetProvider {
             serviceIntent
                     .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds[i]);
             context.startService(serviceIntent);
+
+            RemoteViews widget = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
+
+            Intent startActivityIntent = new Intent(context, ConversationDetailActivity.class);
+            PendingIntent startActivityPendingIntent = PendingIntent.getActivity(context, 0, startActivityIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            widget.setPendingIntentTemplate(R.id.listViewWidget, startActivityPendingIntent);
 
             RemoteViews remoteViews = updateWidgetListView(context,
                     appWidgetIds[i]);

@@ -28,6 +28,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -70,9 +72,6 @@ public class ConversationDetailFragment extends Fragment {
     DatabaseReference myRef = database.getReference();
     Query mMessageQuery;
     ChildEventListener mMessageChildEventListener;
-    /**
-     * The dummy content this fragment is presenting.
-     */
 
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
@@ -106,6 +105,8 @@ public class ConversationDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+
         if (getArguments().containsKey(ARG_CONVERSATION_ID)) {
             mConversationId = getArguments().getString(ConversationDetailFragment.ARG_CONVERSATION_ID);
             mAdapter = new RVAdapter(new ArrayList<Message>());
@@ -135,6 +136,7 @@ public class ConversationDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.conversation_detail, container, false);
+
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setHasFixedSize(true);
