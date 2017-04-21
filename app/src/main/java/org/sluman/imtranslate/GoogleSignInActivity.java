@@ -230,7 +230,7 @@ public class GoogleSignInActivity extends BaseActivity implements
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(GoogleSignInActivity.this, "Authentication failed.",
+                            Toast.makeText(GoogleSignInActivity.this, R.string.auth_failed,
                                     Toast.LENGTH_SHORT).show();
                         }
                         // [START_EXCLUDE]
