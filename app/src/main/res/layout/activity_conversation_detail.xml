@@ -70,7 +70,7 @@
             app:fabSize="mini"
             app:layout_anchor="@+id/conversation_detail_container"
             app:layout_anchorGravity="top|end"
-            app:srcCompat="@android:drawable/stat_notify_chat" />
+            app:srcCompat="@drawable/ic_send_white_24px" />
     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>
