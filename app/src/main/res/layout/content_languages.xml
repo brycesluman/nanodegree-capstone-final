@@ -21,6 +21,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layoutManager="LinearLayoutManager"
-        tools:context="org.sluman.imtranslate.LanguagesActivity"
+        tools:context="org.sluman.origami.LanguagesActivity"
         tools:listitem="@layout/language_list_item"/>
     </LinearLayout>

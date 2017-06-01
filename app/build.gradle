@@ -2,46 +2,46 @@ apply plugin: 'com.android.application'
 
 android {
     signingConfigs {
-//        config {
-//            keyAlias RELEASE_KEY_ALIAS
-//            keyPassword RELEASE_KEY_PASSWORD
-//            storeFile file("$rootDir/imtranslatekey.jks")
-//            storePassword RELEASE_STORE_PASSWORD
-//        }
-        udacityconfig {
-            keyAlias 'udacity'
-            keyPassword 'password'
-            storeFile file("$rootDir/udacity.jks")
-            storePassword 'password'
+        config {
+            keyAlias RELEASE_KEY_ALIAS
+            keyPassword RELEASE_KEY_PASSWORD
+            storeFile file("$rootDir/origamikey.jks")
+            storePassword RELEASE_STORE_PASSWORD
         }
     }
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
-        applicationId "org.sluman.imtranslate"
+        applicationId "org.sluman.origami"
         minSdkVersion 21
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
         multiDexEnabled true
         buildConfigField("String", "TRANSLATE_API_KEY", TRANSLATE_API_KEY)
+        signingConfig signingConfigs.config
     }
     configurations.all {
         resolutionStrategy.force 'com.google.code.findbugs:jsr305:1.3.9'
     }
     buildTypes {
+        debug {
+            debuggable truer
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.udacityconfig
+            signingConfig signingConfigs.config
+            debuggable false
         }
         packagingOptions {
             exclude 'META-INF/LICENSE'
             exclude 'META-INF/io.netty.versions.properties'
             exclude 'META-INF/INDEX.LIST'
         }
+    }
+    productFlavors {
     }
 }
 repositories {
@@ -59,12 +59,12 @@ dependencies {
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
-    compile 'com.google.firebase:firebase-core:10.2.1'
-    compile 'com.google.firebase:firebase-database:10.2.1'
-    compile 'com.google.firebase:firebase-auth:10.2.1'
-    compile 'com.google.firebase:firebase-messaging:10.2.1'
-    compile 'com.google.firebase:firebase-ads:10.2.1'
-    compile 'com.google.android.gms:play-services-auth:10.2.1'
+    compile 'com.google.firebase:firebase-core:10.2.4'
+    compile 'com.google.firebase:firebase-database:10.2.4'
+    compile 'com.google.firebase:firebase-auth:10.2.4'
+    compile 'com.google.firebase:firebase-messaging:10.2.4'
+    compile 'com.google.firebase:firebase-ads:10.2.4'
+    compile 'com.google.android.gms:play-services-auth:10.2.4'
     testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'

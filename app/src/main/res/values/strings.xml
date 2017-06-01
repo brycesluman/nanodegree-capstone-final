@@ -1,5 +1,5 @@
-<resources>
-    <string name="app_name">IMTranslate</string>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" translatable="false">Origami Messenger</string>
     <string name="title_conversation_detail">Conversation Detail</string>
     <string name="title_activity_settings">Settings</string>
 
@@ -101,7 +101,7 @@
     <string name="hint_password">Password</string>
     <string name="desc_firebase_lockup">Firebase logo and name</string>
     <string name="auth_failed">Authentication failed</string>
-    <string name="sign_in_sign_up">Sign In/Sign Up</string>
+    <string name="sign_in_sign_up">Account</string>
     <string name="title_activity_languages">LanguagesActivity</string>
 
     <string name="action_settings">Settings</string>
@@ -110,12 +110,20 @@
     <string name="conversations">Conversations</string>
     <string name="support_languages">Supported Languages</string>
     <string name="search">Search</string>
-    <string name="please_sign_in_to_use_imtranslate">Please sign in to use IMTranslate</string>
+    <string name="please_sign_in_to_use_imtranslate">Please sign in to use Origami Messenger</string>
     <string name="search_for_users_to_chat_to">Search for users with which to chat</string>
     <string name="no_results">No results</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
     <string name="play_services_error">Google Play Services error.</string>
 
-    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="debug_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-7204085226366830/4833674308</string>
+    <string name="oauth_web_application_client_id" translatable="false">149233706805-i33gvku5jq1fomlgbcoj4vgvknl9oga7.apps.googleusercontent.com</string>
+    <string name="share">Share</string>
+    <string name="check_out">Check out Origami Messenger</string>
+
+    <string name="language_dialog_format">Your language is currently set as <xliff:g id="language">%1$s</xliff:g>, would you like to change it?</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
 </resources>

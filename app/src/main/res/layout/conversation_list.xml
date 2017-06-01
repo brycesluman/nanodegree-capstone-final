@@ -31,7 +31,7 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="match_parent"
                                         app:layoutManager="LinearLayoutManager"
-                                        tools:context="org.sluman.imtranslate.ConversationListActivity"
+                                        tools:context="org.sluman.origami.ConversationListActivity"
                                         tools:listitem="@layout/conversation_list_content"
     />
     </LinearLayout>

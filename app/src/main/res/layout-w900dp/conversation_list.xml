@@ -9,7 +9,7 @@
               android:divider="?android:attr/dividerHorizontal"
               android:orientation="horizontal"
               android:showDividers="middle"
-              tools:context="org.sluman.imtranslate.ConversationListActivity">
+              tools:context="org.sluman.origami.ConversationListActivity">
 
     <!--
     This layout is a two-pane layout for the Conversations
@@ -27,7 +27,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context="org.sluman.imtranslate.ConversationListActivity"
+        tools:context="org.sluman.origami.ConversationListActivity"
         tools:listitem="@layout/conversation_list_content"/>
 
     <FrameLayout
