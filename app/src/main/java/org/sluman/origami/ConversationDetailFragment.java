@@ -95,8 +95,6 @@ public class ConversationDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-
         if (getArguments().containsKey(ARG_CONVERSATION_ID)) {
             mConversationId = getArguments().getString(ConversationDetailFragment.ARG_CONVERSATION_ID);
             mAdapter = new RVAdapter(new ArrayList<Message>());
@@ -136,7 +134,6 @@ public class ConversationDetailFragment extends Fragment {
 
         return rootView;
     }
-
 
     public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ConversationViewHolder>{
         List<Message> messages;
@@ -181,13 +178,13 @@ public class ConversationDetailFragment extends Fragment {
 
         @Override
         public ConversationViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            int viewId = R.layout.conversation_detail_item;
+            int viewId = R.layout.conversation_detail_alt_item;
             switch (viewType) {
                 case 0:
-                    viewId = R.layout.conversation_detail_item;
+                    viewId = R.layout.conversation_detail_alt_item;
                     break;
                 case 1:
-                    viewId = R.layout.conversation_detail_alt_item;
+                    viewId = R.layout.conversation_detail_item;
                     break;
             }
             View v = LayoutInflater.from(parent.getContext()).inflate(viewId, parent, false);
@@ -201,7 +198,7 @@ public class ConversationDetailFragment extends Fragment {
             holder.text.setText(Html.fromHtml(messages.get(position).text));
             holder.translatedText.setText(Html.fromHtml(messages.get(position).translatedText));
             holder.userAvatar.setContentDescription(messages.get(position).username);
-            if (!messages.get(position).text.equalsIgnoreCase(messages.get(position).translatedText)) {
+            if (messages.get(position) != null && !messages.get(position).text.equalsIgnoreCase(messages.get(position).translatedText)) {
                 if (holder.attribution != null) {
                     holder.attribution.setVisibility(View.VISIBLE);
                 }

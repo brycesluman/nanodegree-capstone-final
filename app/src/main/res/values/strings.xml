@@ -126,4 +126,7 @@
     <string name="language_dialog_format">Your language is currently set as <xliff:g id="language">%1$s</xliff:g>, would you like to change it?</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

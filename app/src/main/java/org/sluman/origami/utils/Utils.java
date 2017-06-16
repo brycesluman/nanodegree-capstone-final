@@ -3,9 +3,18 @@ package org.sluman.origami.utils;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
+import com.google.cloud.translate.Detection;
+import com.google.cloud.translate.Language;
+import com.google.cloud.translate.Translate;
+import com.google.cloud.translate.TranslateOptions;
+import com.google.cloud.translate.Translation;
+
+import com.google.common.collect.ImmutableList;
 import com.google.firebase.database.FirebaseDatabase;
 
+import org.sluman.origami.BuildConfig;
 import org.sluman.origami.R;
 import org.sluman.origami.data.FirebaseWidgetService;
 
@@ -18,6 +27,7 @@ import java.util.List;
  */
 
 public class Utils {
+    private static final String API_KEY = BuildConfig.TRANSLATE_API_KEY;
     private static FirebaseDatabase mDatabase;
 
     public static FirebaseDatabase getDatabase() {
@@ -66,5 +76,32 @@ public class Utils {
         int[] ids = {R.xml.new_app_widget_info};
         widgetIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
         context.sendBroadcast(widgetIntent);
+    }
+
+    public static String translateText(String text, String source, String target) {
+        Translate translate = createTranslateService();
+        Translation translation =
+                translate.translate(
+                        text,
+                        Translate.TranslateOption.sourceLanguage(source),
+                        Translate.TranslateOption.targetLanguage(target));
+        return translation.getTranslatedText();
+    }
+
+    public static Translate createTranslateService() {
+        TranslateOptions options = TranslateOptions.newBuilder()
+                .setApiKey(API_KEY)
+                .build();
+        return options.getService();
+    }
+    public String detectLanguage(String sourceText) {
+        String language = "";
+        Translate translate = createTranslateService();
+        List<Detection> detections = translate.detect(ImmutableList.of(sourceText));
+        System.out.println("Language(s) detected:");
+        for (Detection detection : detections) {
+            language = detection.getLanguage();
+        }
+        return language;
     }
 }

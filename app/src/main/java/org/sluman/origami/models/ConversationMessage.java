@@ -25,6 +25,7 @@ public class ConversationMessage implements Parcelable{
     public String text;
     public String translatedText;
     public boolean isUnread;
+    public boolean translated;
     public ConversationMessage() {
     }
 
@@ -37,7 +38,8 @@ public class ConversationMessage implements Parcelable{
                                String translatedText,
                                String userAvatar,
                                String username,
-                               boolean isUnread) {
+                               boolean isUnread,
+                               boolean translated) {
         this.otherUid = otherUid;
         this.otherUsername = otherUsername;
         this.otherAvatar = otherAvatar;
@@ -48,6 +50,7 @@ public class ConversationMessage implements Parcelable{
         this.userAvatar = userAvatar;
         this.username = username;
         this.isUnread = isUnread;
+        this.translated = translated;
     }
 
     public ConversationMessage(Parcel in) {
@@ -61,6 +64,7 @@ public class ConversationMessage implements Parcelable{
         this.userAvatar = in.readString();
         this.username = in.readString();
         this.isUnread = in.readByte() != 0;
+        this.translated = in.readByte() != 0;
     }
 
     @Override
@@ -80,6 +84,7 @@ public class ConversationMessage implements Parcelable{
         dest.writeString(this.userAvatar);
         dest.writeString(this.username);
         dest.writeByte((byte) (isUnread ? 1 : 0));
+        dest.writeByte((byte) (translated ? 1 : 0));
     }
 
     @Exclude
@@ -95,6 +100,7 @@ public class ConversationMessage implements Parcelable{
         result.put("userAvatar", this.userAvatar);
         result.put("username", this.username);
         result.put("isUnread", this.isUnread);
+        result.put("translated", this.translated);
 
         return result;
     }

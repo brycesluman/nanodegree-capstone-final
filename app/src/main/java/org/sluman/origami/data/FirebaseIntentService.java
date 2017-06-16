@@ -7,10 +7,12 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.google.cloud.translate.Detection;
 import com.google.cloud.translate.Language;
 import com.google.cloud.translate.Translate;
 import com.google.cloud.translate.TranslateOptions;
 import com.google.cloud.translate.Translation;
+import com.google.common.collect.ImmutableList;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.sluman.origami.utils.Utils.createTranslateService;
+
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
@@ -40,7 +44,6 @@ import java.util.Optional;
  * helper methods.
  */
 public class FirebaseIntentService extends IntentService {
-    private static final String API_KEY = BuildConfig.TRANSLATE_API_KEY;
 
     // TODO: Rename actions, choose action names that describe tasks that this
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
@@ -124,13 +127,7 @@ public class FirebaseIntentService extends IntentService {
         // /conversations/$conversationid simultaneously
         String translatedText = text;
         if (!sourceLang.equals(targetLang)) {
-            Translate translate = createTranslateService();
-            Translation translation =
-                    translate.translate(
-                            text,
-                            Translate.TranslateOption.sourceLanguage(sourceLang),
-                            Translate.TranslateOption.targetLanguage(targetLang));
-            translatedText = translation.getTranslatedText();
+            translatedText = Utils.translateText(text, sourceLang, targetLang);
         }
         String messageKey = myRef.child("messages").child(key).push().getKey();
         Message message = new Message(uid, text, timestamp, translatedText, userAvatar, username);
@@ -142,9 +139,9 @@ public class FirebaseIntentService extends IntentService {
         for (String userKey : Utils.getKeys(key)) {
             childUpdates.put("/conversations/" + key + "/" + userKey, true);
             if (userKey.equals(uid)) {
-                conversationMessage = new ConversationMessage(otherUid, otherUsername, otherAvatar, uid, text, timestamp, translatedText, userAvatar, username, false);
+                conversationMessage = new ConversationMessage(otherUid, otherUsername, otherAvatar, uid, text, timestamp, translatedText, userAvatar, username, false, false);
             } else {
-                conversationMessage = new ConversationMessage(uid, username, userAvatar, otherUid, translatedText, timestamp, text, otherAvatar, otherUsername, true);
+                conversationMessage = new ConversationMessage(uid, username, userAvatar, otherUid, translatedText, timestamp, text, otherAvatar, otherUsername, true, false);
             }
             childUpdates.put("/user-conversations/" + userKey + "/" + key, conversationMessage.toMap());
         }
@@ -174,12 +171,6 @@ public class FirebaseIntentService extends IntentService {
 
     }
 
-    private Translate createTranslateService() {
-        TranslateOptions options = TranslateOptions.newBuilder()
-                .setApiKey(API_KEY)
-                .build();
-        return options.getService();
-    }
 
     public void displaySupportedLanguages(Optional<String> tgtLang) {
         Translate translate = createTranslateService();
@@ -219,7 +210,7 @@ public class FirebaseIntentService extends IntentService {
                     if (snapshot.exists()) {
                         ConversationMessage message = snapshot.getValue(ConversationMessage.class);
                         Map<String, Object> childUpdates = new HashMap<>();
-                        ConversationMessage conversationMessage = new ConversationMessage(message.otherUid, message.otherUsername, message.otherAvatar, message.uid, message.text, message.timestamp, message.translatedText, message.userAvatar, message.username, false);
+                        ConversationMessage conversationMessage = new ConversationMessage(message.otherUid, message.otherUsername, message.otherAvatar, message.uid, message.text, message.timestamp, message.translatedText, message.userAvatar, message.username, false, false);
                         childUpdates.put("/user-conversations/" + SharedPrefsUtils.getUser(getApplicationContext()) + "/" + conversationId, conversationMessage.toMap());
                         myRef.updateChildren(childUpdates);
                     }

@@ -98,7 +98,7 @@ public class ConversationListActivity extends BaseActivity {
                     Intent conversationIntent = new Intent(context, ConversationDetailActivity.class);
                     conversationIntent.putExtra(ConversationDetailFragment.ARG_CONVERSATION_ID,
                             intent.getStringExtra(FirebaseIntentService.EXTRA_CONVERSATION_ID));
-                    conversationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    conversationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(conversationIntent);
                 }
             }

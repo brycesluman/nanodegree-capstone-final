@@ -24,7 +24,9 @@ public class ConversationMessageView extends ConversationMessage {
                 message.translatedText,
                 message.userAvatar,
                 message.username,
-                message.isUnread);
+                message.isUnread,
+                message.translated
+        );
         this.key = key;
     }
 }
