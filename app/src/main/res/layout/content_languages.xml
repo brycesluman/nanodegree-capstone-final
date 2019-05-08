@@ -14,7 +14,7 @@
         android:text="@string/choose_your_language"
         style="@style/Base.TextAppearance.AppCompat.Subhead"
         />
-    <android.support.v7.widget.RecyclerView android:id="@+id/language_list"
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/language_list"
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"

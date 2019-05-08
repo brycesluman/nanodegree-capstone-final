@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.sluman.origami">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -8,17 +9,22 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
-        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:fullBackupContent="@xml/backup_descriptor"
+        tools:ignore="GoogleAppIndexingWarning">
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_search_white" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />
+        <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
 
         <activity
             android:name="org.sluman.origami.ConversationListActivity"
@@ -31,6 +37,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="org.sluman.origami.ConversationDetailActivity"
             android:configChanges="orientation"
@@ -41,6 +48,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.sluman.origami.ConversationListActivity" />
         </activity>
+
         <activity
             android:name="org.sluman.origami.SettingsActivity"
             android:configChanges="orientation|keyboard"
@@ -64,6 +72,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.sluman.origami.ConversationListActivity" />
         </activity>
+
         <activity
             android:name="org.sluman.origami.SearchActivity"
             android:parentActivityName="org.sluman.origami.ConversationListActivity"
@@ -73,6 +82,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.sluman.origami.ConversationListActivity" />
         </activity>
+
         <activity
             android:name="org.sluman.origami.LanguagesActivity"
             android:label="@string/title_activity_languages"
@@ -88,13 +98,10 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name="org.sluman.origami.data.MyFirebaseInstanceIDService">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
-            </intent-filter>
-        </service>
+
         <service android:name="org.sluman.origami.data.WidgetService"
                 android:permission="android.permission.BIND_REMOTEVIEWS" />
+
         <receiver android:name="org.sluman.origami.data.NewAppWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

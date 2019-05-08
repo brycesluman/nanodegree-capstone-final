@@ -16,26 +16,33 @@ package org.sluman.origami.data;
  */
 
 
-        import android.app.NotificationManager;
-        import android.app.PendingIntent;
-        import android.content.Context;
-        import android.content.Intent;
-        import android.media.RingtoneManager;
-        import android.net.Uri;
-        import android.support.v4.app.NotificationCompat;
-        import android.util.Log;
-
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import androidx.core.app.NotificationCompat;
+import android.util.Log;
 //        import com.firebase.jobdispatcher.Constraint;
 //        import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 //        import com.firebase.jobdispatcher.GooglePlayDriver;
 //        import com.firebase.jobdispatcher.Job;
-        import com.google.firebase.messaging.FirebaseMessagingService;
-        import com.google.firebase.messaging.RemoteMessage;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 
-        import org.sluman.origami.ConversationDetailActivity;
-        import org.sluman.origami.R;
+import org.sluman.origami.ConversationDetailActivity;
+import org.sluman.origami.R;
+import org.sluman.origami.utils.SharedPrefsUtils;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
+
+    @Override
+    public void onNewToken(String s) {
+        super.onNewToken(s);
+
+        sendRegistrationToServer(s);
+    }
 
     private static final String TAG = "MyFirebaseMsgService";
 
@@ -130,5 +137,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+    }
+
+    /**
+     * Persist token to third-party servers.
+     *
+     * Modify this method to associate the user's FCM InstanceID token with any server-side account
+     * maintained by your application.
+     *
+     * @param token The new token.
+     */
+    private void sendRegistrationToServer(String token) {
+        Log.d(TAG, "Send token: " + token);
+        SharedPrefsUtils.setUserToken(this, token);
     }
 }

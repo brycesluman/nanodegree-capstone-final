@@ -13,4 +13,6 @@
     <item android:title="@string/choose_language"
         android:id="@+id/open_language_picker"
         />
+    <item android:title="@string/terms_of_service"
+        android:id="@+id/tos" />
 </menu>

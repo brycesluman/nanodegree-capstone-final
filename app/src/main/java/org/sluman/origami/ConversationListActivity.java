@@ -1,18 +1,20 @@
 package org.sluman.origami;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.support.design.widget.FloatingActionButton;
+import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -99,6 +101,7 @@ public class ConversationListActivity extends BaseActivity {
                     conversationIntent.putExtra(ConversationDetailFragment.ARG_CONVERSATION_ID,
                             intent.getStringExtra(FirebaseIntentService.EXTRA_CONVERSATION_ID));
                     conversationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    conversationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(conversationIntent);
                 }
             }
@@ -128,12 +131,15 @@ public class ConversationListActivity extends BaseActivity {
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
+        overridePendingTransition(R.anim.slide_in_to_left, R.anim.slide_out_to_left);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
         toolbar.setNavigationIcon(R.drawable.logo);
-
-        MobileAds.initialize(this, "ca-app-pub-7204085226366830~1880207904");
+//      Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713
+//      Actual AdMob app ID: ca-app-pub-7204085226366830~1880207904
+        MobileAds.initialize(this,  BuildConfig.DEBUG ? "ca-app-pub-3940256099942544~3347511713": "ca-app-pub-7204085226366830~1880207904");
 
         mAdView = (AdView) findViewById(R.id.adView);
         AdRequest.Builder builder = new AdRequest.Builder();
@@ -180,6 +186,11 @@ public class ConversationListActivity extends BaseActivity {
                 return true;
             case R.id.open_language_picker:
                 startActivity(new Intent(this, LanguagesActivity.class));
+                return true;
+            case R.id.tos:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://bsluman.wixsite.com/privacy-policy"));
+                browserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(browserIntent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

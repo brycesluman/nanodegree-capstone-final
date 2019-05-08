@@ -1,13 +1,12 @@
 package org.sluman.origami.data;
 
-/**
+/*
  * Created by bryce on 4/13/17.
- */
+**/
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -18,7 +17,6 @@ import android.widget.RemoteViewsService.RemoteViewsFactory;
 import com.bumptech.glide.BitmapRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.FutureTarget;
-import com.bumptech.glide.request.target.AppWidgetTarget;
 
 import org.sluman.origami.ConversationDetailFragment;
 import org.sluman.origami.R;
@@ -36,14 +34,10 @@ import org.sluman.origami.models.ConversationMessageView;
  */
 public class ListProvider implements RemoteViewsFactory {
     private ArrayList<ConversationMessageView> listItemList = new ArrayList<ConversationMessageView>();
-    private Context context = null;
-    private int appWidgetId;
-    private AppWidgetTarget appWidgetTarget;
+    private Context context;
 
-    public ListProvider(Context context, Intent intent) {
+    ListProvider(Context context, Intent intent) {
         this.context = context;
-        appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID);
         Log.d("ListProvider", "ListProvider start");
         populateListItem();
     }
@@ -53,7 +47,7 @@ public class ListProvider implements RemoteViewsFactory {
             listItemList = (ArrayList<ConversationMessageView>) FirebaseWidgetService.listItemList
                     .clone();
         else
-            listItemList = new ArrayList<ConversationMessageView>();
+            listItemList = new ArrayList<>();
 
         Log.d("ListProvider", "populateListItem() " + listItemList);
     }
